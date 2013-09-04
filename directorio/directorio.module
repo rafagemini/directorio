@@ -1,0 +1,180 @@
+<?php
+	/**
+	* Implements hook_menu()
+	*/
+	function  directorio_menu(){
+		$items = array();
+		$items['directorio']	= array(
+				'title'	=>	'directorio',
+				'description'	=>	'Listado de contactos en el sitio',
+				'page callback'	=> 'directorio_page',
+				'access callback' => 'user_access',
+				'access arguments' => array("ver directorio"),
+				'type' => MENU_NORMAL_ITEM
+				//hook_menu buscar type
+		);
+		
+		$items['directorio/buscar']=array(
+			'title' => 'buscar',
+			'description'	=> 'Busqueda de contactos',
+			'page callback' => 'busqueda_page',
+			'access callback'	=> 'user_access',
+			'access arguments'	=> array("busqueda"),
+			'type' => MENU_NORMAL_ITEM
+		);
+
+		//$items['directorio/buscar/nombre/%'] = array();
+		//$items['directorio/buscar/extension/%'] =array();
+		$items['contactos/agregar'] = array(
+			 'title' => 'Agregar Contacto',
+				'description'	=>	'Formulario Agregar contactos',
+				'page callback'	=> 'drupal_get_form',
+				'page arguments' => array('directorio_agregarContactoForm'),
+				'access callback' => 'user_access',
+				'access arguments' => array("agregar contacto"),
+				'type' => MENU_NORMAL_ITEM
+			);
+		//$items['contactos/ver/%'] = array();
+		//$items['contactos/editar/%'] = array();
+		//$items['contactor/eliminar/%'] = array();
+	return $items;
+	}
+	/*
+	Callback principal de /directorio
+	Muestra un listado de contactos de sitios
+	*/
+	function directorio_page(){
+		return "Esto es un directorio";
+	}
+
+	/*
+	 * funcion busqueda
+	*/
+
+	function busqueda_page(){
+		return "busqueda";
+	}
+
+	/*
+	*
+	*/
+	function directorio_agregarContactoForm($form){
+		$form = array();
+		$form["nombre"]	=	array(
+			"#type"	=>	"textfield",
+			'#title'	=> t("Nombre"),
+			'#required'	=> TRUE,
+			'#description' => t('Escriba el Nombre o los Nombres de contacto')
+		);
+		$form['apellido_paterno'] = array(
+			'#type'	=> 'textfield',
+			'#title'	=>	t('Apellido Paterno'),
+			'#required'	=>	TRUE,
+			'#description'	=> t('Escribe el Apellido Paterno')
+			);
+		$form['apellido_materno'] =array(
+			'#type' => 'textfield',
+			'#title'	=> 	t('Apellido Materno'),
+			'#required'	=> FALSE,
+			'#description'	=>	t('Escribe el Apellido Materno')
+			);
+		$form['departamento'] = array(
+			'#type'	=> 'select',
+			'#title'	=> 'Departamento',
+			'#required' =>TRUE,
+			'#description'	=>  t('Seleccion el departamento al que pertenece esta persona'),
+			'#options' => getDepartamento()
+
+			);
+		$form['telefono_oficina'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Telefono de Oficina'),
+			'#description'	=>	t('Escribe el telefono de oficina'),
+			'#default_value'	=> _telefonoDeOficinaDefault()
+			);
+		
+		$form['extension_telefonica'] = array(
+			'#type' => 	'textfield',
+			'#title' => 'Extension',
+			'#description' => t(''),
+			'#required' =>TRUE,
+			);
+
+		$form['correo_oficina'] = array(
+			'#type' => 	'textfield',
+			'#title' => 'Correo de Oficina',
+			'#required' =>FALSE,
+			'#description' => t('Escribe el Correo de Oficina'),
+			);
+
+		$form['correo_personal'] = array(
+			'#type'	=> 'textfield',
+			'#title' => 'Correo Personal',
+			'#required' =>FALSE,
+			'#description' => t('Escribe el correo Personal'),
+			);
+
+		$form['telefono_casa'] = array(
+			'#type'	=>	'textfield',
+			'#title' => 'Telefono de Casa',
+			'#required' =>FALSE,
+			'#description' => t('Escribe el Telefono de Casa'),
+		);
+
+		$form['actions'] = array(
+			'#prefix' => '<div class ="actions well" style="background:blue;">',
+			'#suffix' => '</div>'
+			);
+
+		$form['actions']['submit'] = array(
+			'#type'	=> 'submit',
+			'#value' => t('save')
+			);
+
+		//$form['#sumbit']
+		return $form;
+	}
+
+	function directorio_agregarContactoForm_validate(&$form, &$form_state){
+		dsm($form_state);
+	}
+
+	function directorio_agregarContactoForm_sumbit(&$form, &$form_state){
+		$values = $form_state['values'];
+		dsm($values);
+	}
+
+	function _telefonoDeOficinaDefault(){
+		return "2020-7350";
+	}
+	/*
+	* -listado de departamentos en la compañia
+		@return arrary listado departamento
+	*/
+	function getDepartamento(){
+		return array(
+			'administracion'	=>	t('Administracion'),
+			'sistemas'	=> t('Sistemas'),
+			'recursos_humanos'	=> t('Recursos Humanos'),
+			'ventas'	=> t('Ventas')
+			);
+	}
+	/*
+	*Callback permirsos directorio principal
+	*/
+	function directorio_permission(){
+		return array(
+			'ver directorio' => array(
+				'title ' => 'ver directorio',
+				'description'	=> t('Perimite mostrar el directorio')
+				),
+			'agregar contacto' => array(
+				'title ' => 'agregar contacto',
+				'description'	=> t('agregar contactos')
+				),
+			'busqueda' => array(
+				'title ' => 'agregar contacto',
+				'description'	=> t('agregar contactos')
+				)
+			);
+	}

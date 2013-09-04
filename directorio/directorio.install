@@ -1,0 +1,109 @@
+<?php
+	/**
+	* implements hook_install()
+	*/
+	function directorio_install(){
+
+	}
+	/*
+	* Implements hook_uninstall()
+	*/
+	function directorio_uninstall(){
+
+	}
+	/*
+	* Implements hook_schema()
+	*/
+	function directorio_schema(){
+		$schema = array();
+		$schema["contactos"] = array(
+			'description' => 'La tabla de contactos',
+			'fields' => array(
+				'cid' => array(
+					'description' => 'EL ID unico del contactos',
+					'type'	=> 'serial',
+					'unsigned' => TRUE,
+					'not null' => TRUE
+				),
+				'nombre' => array(
+					'description' => 'Nombre o nombres del contacto',
+					'type'	=> 'varchar',
+					'length'	=> '255',
+					'not null'	=> TRUE,
+					'default'	=> ''
+				),
+				'apellido_paterno' => array(
+					'description'	=> 	'Apellido Paterno',
+					'type'	=> 'varchar',
+					'length'	=>	'255',
+					'not null'	=> TRUE,
+					'default'	=> ''
+				),
+				'apellido_materno'	=> array(
+					'description'	=> 'Apellido Materno',
+					'type'	=> 'varchar',
+					'length'	=> '255',
+					'not null'	=> FALSE,
+					'default'	=> ''
+				),
+				'departamento'	=> array(
+					'description'	=> 'Nombre del Departamento al que pertenece',
+					'type'	=> 'varchar',
+					'length'	=> '255',
+					'not null' => TRUE,
+					'default'	=> '',
+				),
+				'telfono_oficina'	=> array(
+					'description'	=>	'Telefono de oficina',
+					'type'	=> 'varchar',
+					'length'	=> '24',
+					'not null'	=>  TRUE,
+					'default' => ''
+				),
+				'oficina_extension' => array(
+					'description'	=>	'Extension',
+					'type'	=> 'varchar',
+					'length' =>'24',
+					'not null' => FALSE,
+					'default'	=> ''
+				),
+				'email_trabajo' => array(
+					'description'	=> 'Email del Trabajo',
+					'type'	=> 'varchar',
+					'length'	=> '255',
+					'not null'	=> FALSE,
+					'default'	=> ''
+				),
+				'email_personal' => array(
+					'description' => 'Email Personal',
+					'type' => 'varchar',
+					'length'	=> '255',
+					'not null' => FALSE,
+					'default'	=> ''
+				),
+				'telfono_casa' => array(
+					'description'	=> 'Telefono de Casa',
+					'type'	=> 'varchar',
+					'length'	=> '24',
+					'not null' => FALSE,
+					'default' => ''
+				),
+				'telfono_celular' => array(
+					'description' => 'Telefono Celular',
+					'type'	=> 'varchar',
+					'length'	=> '24',
+					'not null'	=> FALSE,
+					'default'	=> ''
+				)
+			),
+			'indexes' => array(
+				'nombre'	=>	array('nombre'),
+				'apellido_paterno'	=> array('apellido_materno'),
+				'oficina_extension'	=> array('oficina_extension'),
+				'email_trabajo'	=>	array('email_trabajo')
+			),
+			'primary key' => array('cid')
+		);
+
+		return $schema;
+	}
