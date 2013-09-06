@@ -34,10 +34,53 @@
 				'access arguments' => array("agregar contacto"),
 				'type' => MENU_NORMAL_ITEM
 			);
-		//$items['contactos/ver/%'] = array();
+		$items['contactos/ver/%'] = array(
+			'title callback'	=> 'contactosTitle',
+			'title arguments'	=> array(1 , 2),
+			'description'	=>	'Ver contacto',
+			'page callback'	=> 'contactosVer',
+			'page arguments' => array(2),
+			'access arguments'	=> array('ver directorio'),
+			'type'	=>	MENU_CALLBACK
+			// url dinamica
+			);
 		//$items['contactos/editar/%'] = array();
 		//$items['contactor/eliminar/%'] = array();
 	return $items;
+	}
+
+	/*
+	*/
+	function contactosTitle($op,$cid){
+		$contacto 	=	contactosLoad($cid);
+		$output ="";
+		switch ($op) {
+			case 'ver':
+				$output = contactoRealname($contacto);
+				break;
+			case 'editar':
+				$output	= t("Editar contacto !contacto",array("!contacto"=> contactoRealname($contacto)));
+				break;
+		}
+		return $output;
+	}
+
+	function contactoRealname($contacto){
+		if(is_array($contacto)){
+			return $contacto['nombre']	. " "	.	$contacto['apellido_paterno']	.	" "	.	$contacto['apellido_materno'];
+		}elseif(is_object($contacto)){
+			return $contacto->nombre  .	" "	.	 $contacto->apellido_paterno	.	 " " .	$contacto->apellido_materno;
+		}else{
+			return NULL;
+		}
+	}
+
+	function contactosLoad($cid){
+		return db_select('contactos','c')
+			->fields('c')
+			->condition('c.cid',$cid,"=")
+			->execute()
+			->fetchObject();
 	}
 	/*
 	Callback principal de /directorio
@@ -45,6 +88,10 @@
 	*/
 	function directorio_page(){
 		return "Esto es un directorio";
+	}
+
+	function contactosVer($cid){
+		return $cid;
 	}
 
 	/*
@@ -93,7 +140,7 @@
 			'#default_value'	=> _telefonoDeOficinaDefault()
 			);
 		
-		$form['extension_telefonica'] = array(
+		$form['oficina_extension'] = array(
 			'#type' => 	'textfield',
 			'#title' => 'Extension',
 			'#description' => t(''),
@@ -113,6 +160,13 @@
 			'#required' =>FALSE,
 			'#description' => t('Escribe el correo Personal'),
 			);
+
+		$form['telefono_celular'] = array(
+			'#type'	=>	'textfield',
+			'#title' => 'Telefono de Celular',
+			'#required' =>FALSE,
+			'#description' => t('Escribe el Telefono de Celular'),
+		);
 
 		$form['telefono_casa'] = array(
 			'#type'	=>	'textfield',
@@ -135,13 +189,30 @@
 		return $form;
 	}
 
-	function directorio_agregarContactoForm_validate(&$form, &$form_state){
-		dsm($form_state);
-	}
-
-	function directorio_agregarContactoForm_sumbit(&$form, &$form_state){
-		$values = $form_state['values'];
+	function directorio_agregarContactoForm_submit(&$form, &$form_state){
+		$values = $form_state["values"];
 		dsm($values);
+		$persona  = array(
+			'nombre'	=> $values['nombre'],
+			'apellido_paterno'	=>	$values['apellido_paterno'],
+			'apellido_materno'	=> 	$values['apellido_materno'],
+			'departamento'	=> 	$values['departamento'],
+			'telfono_oficina'	=> $values['telefono_oficina'],
+			'oficina_extension'	=> $values['oficina_extension'],
+			'email_trabajo'	=>	$values['correo_oficina'],
+			'email_personal'	=> $values['correo_personal'],
+			'telfono_celular'	=> $values['telefono_celular'],
+			'telfono_casa'	=> $values['telefono_casa']
+		);
+
+		$cid = db_insert('contactos')
+					->fields($persona)
+					->execute();
+		if($cid){
+			drupal_set_message(t('Se ingreso con exito la informacion con !id ',array("!id" => $cid)));
+		}else{
+			drupal_set_message(t('Error al ingresar'));
+		}
 	}
 
 	function _telefonoDeOficinaDefault(){
