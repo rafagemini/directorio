@@ -1,0 +1,1 @@
+<p class="saludo"><em><?php echo $cid; ?></em></p>

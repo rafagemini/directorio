@@ -91,7 +91,21 @@
 	}
 
 	function contactosVer($cid){
-		return $cid;
+		$contacto = array(
+			'cid' => $cid
+			);
+		return theme('contactosVer',$contacto);
+	}
+
+	/*
+	* funcion hook_theme
+	*/
+	function directorio_theme(){
+		return  array(
+				'contactosVer' => array(
+						'template' => 'contacto-ver'
+					)
+				);
 	}
 
 	/*
