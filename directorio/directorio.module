@@ -115,7 +115,7 @@
 			$row['apellido_paterno'] = $contacto->apellido_paterno;
 			$row['apellido_materno'] = $contacto->apellido_materno;
 			$row['departamento']	= $contacto->departamento;
-			$row['ver'] = l(t('ver'),'contactos/ver'.$contacto->cid);
+			$row['ver'] = l(t('ver'),'contactos/ver/'.$contacto->cid);
 			$rows[] = $row;
 		endforeach;
 		return theme('table',array('header' => $header,'rows' => $rows));
@@ -141,14 +141,15 @@
 		$contacto = contactoLoad($cid);
 		// 139.111.%.%
 		$ip = explode('.',ip_address());
+		//echo ip_address();
 		$persona = new stdClass();
 		$persona->nombre = $contacto->nombre;
 		$persona->apellido_paterno = $contacto->apellido_paterno;
 		$persona->apellido_materno = $contacto->apellido_materno;
 		$persona->nombre_completo = contactoRealname($contacto);
 		$persona->departamento = $contacto->departamento;
-		$persona->telefono_oficina = $contacto->telefono_oficina;
-		if(($ip[0] == '139' && $ip[1] == '111') || ($ip[0] == '127' && $ip[1] = '0' && $ip[2] == '0' && $ip[3] == '1')){
+		$persona->telefono_oficina = $contacto->telfono_oficina;
+		if(($ip[0] == '139' && $ip[1] == '111') || ($ip[0] == '127' && $ip[1] == '0' && $ip[2] == '0' && $ip[3] == '1')) {
 			$persona->email_trabajo = $contacto->email_trabajo;
 			$persona->oficina_extension = $contacto->oficina_extension;
 			if(isset($contacto->telfono_celular)){
@@ -162,10 +163,10 @@
 				$persona->telefono_celular = $contacto->telfono_celular;	
 			}
 		}
-		if(user_access("ver datos privados")|| $user->mail == $contacto->email_trabajo){
+		if(user_access("ver datos privados") || $user->mail == $contacto->email_trabajo){
 			$persona->email_trabajo = $contacto->email_trabajo;
 			$persona->email_personal = $contacto->email_personal;
-			$persona->telefono_casa = $contacto->telefono_casa;
+			$persona->telefono_casa = $contacto->telfono_casa;
 			$persona->oficina_extension = $contacto->oficina_extension;
 			//return theme('contactosVer',array('contacto' => $contacto));
 		}
@@ -190,7 +191,6 @@
    /*
    */
    function template_preprocess_contactosVer(&$variables){
-   		dsm($variables);
    		$variables['ultimaconsulta'] = format_date(time(),'short');
    }
 
@@ -348,16 +348,16 @@
 	function directorio_permission(){
 		return array(
 			'ver directorio' => array(
-				'title ' => 'ver directorio',
+				'title' => 'Ver directorio',
 				'description'	=> t('Perimite mostrar el directorio')
 				),
 			'agregar contacto' => array(
-				'title ' => 'agregar contacto',
-				'description'	=> t('agregar contactos')
+				'title' => 'Agregar contacto',
+				'description'	=> t('Agrear contactos')
 				),
 			'busqueda' => array(
-				'title ' => 'Buscar',
-				'description'	=> t('agregar contactos')
+				'title' => 'Buscar',
+				'description'	=> t('Buscar contactos')
 				),
 			'ver datos privados' => array(
 				'title' =>  'Datos privados',

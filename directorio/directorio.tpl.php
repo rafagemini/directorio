@@ -9,7 +9,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<?php  foreach ($contactos as $contacto ):?>
+		<?php  foreach ($rows as $contacto ):?>
 		<tr>
 			<td><?php print $contacto->nombre ?></td>
 			<td><?php print $contacto->apellido_paterno ?></td>
