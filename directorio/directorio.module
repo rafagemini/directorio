@@ -87,14 +87,89 @@
 	Muestra un listado de contactos de sitios
 	*/
 	function directorio_page(){
-		return "Esto es un directorio";
+		$contactos = contactosGetAll();
+		dsm($contactos);
+		$header = array(
+			'nombre' => array(
+				'data' =>  t('Nombre'),
+				'field' => 'nombre'
+			),
+			'apellido_paterno' => array(
+				'data'	=> t('Apellido Paterno'),
+				'field'	=> 'apellido_paterno'
+			),
+			'apellido_materno' => array(
+				'data' => t('Apellido Materno'),
+				'field'	=> 'apellido_materno'
+			),
+			'departamento' => array(
+				'data' 	=> t('Departamento'),
+				'field' => 'departamento'
+			),
+			'ver' => array()
+		);
+
+		$rows = array();
+		foreach ($contactos as $contacto ):
+			$row['nombre'] = $contacto->nombre;
+			$row['apellido_paterno'] = $contacto->apellido_paterno;
+			$row['apellido_materno'] = $contacto->apellido_materno;
+			$row['departamento']	= $contacto->departamento;
+			$row['ver'] = l(t('ver'),'contactos/ver'.$contacto->cid);
+			$rows[] = $row;
+		endforeach;
+		return theme('table',array('header' => $header,'rows' => $rows));
+	}
+	/*
+	 funcion para consultar la base de datos
+	*/
+	function contactosGetAll($departamento = NULL){
+		if(isset($departamento)){
+			$query = db_query("SELECT * FROM {contactos} c WHERE c.departamento :departamento ORDER BY c.cid",array(":departamento"=>$departamento));
+		}else{
+			$query = db_query("SELECT * FROM {contactos} c ORDER BY c.cid");
+		}
+		$results = array();
+		foreach ($query as $result ) {
+			$results[$result->cid] = $result;
+		}
+		return $results;
 	}
 
 	function contactosVer($cid){
-		$contacto = array(
-			'cid' => $cid
-			);
-		return theme('contactosVer',$contacto);
+		global $user;
+		$contacto = contactoLoad($cid);
+		// 139.111.%.%
+		$ip = explode('.',ip_address());
+		$persona = new stdClass();
+		$persona->nombre = $contacto->nombre;
+		$persona->apellido_paterno = $contacto->apellido_paterno;
+		$persona->apellido_materno = $contacto->apellido_materno;
+		$persona->nombre_completo = contactoRealname($contacto);
+		$persona->departamento = $contacto->departamento;
+		$persona->telefono_oficina = $contacto->telefono_oficina;
+		if(($ip[0] == '139' && $ip[1] == '111') || ($ip[0] == '127' && $ip[1] = '0' && $ip[2] == '0' && $ip[3] == '1')){
+			$persona->email_trabajo = $contacto->email_trabajo;
+			$persona->oficina_extension = $contacto->oficina_extension;
+			if(isset($contacto->telfono_celular)){
+				$persona->telefono_celular = $contacto->telfono_celular;
+			}
+		}
+		if(user_is_logged_in()){
+			$persona->email_trabajo = $contacto->email_trabajo;
+			$persona->oficina_extension = $contacto->oficina_extension;
+			if(isset($contacto->telfono_celular)){
+				$persona->telefono_celular = $contacto->telfono_celular;	
+			}
+		}
+		if(user_access("ver datos privados")|| $user->mail == $contacto->email_trabajo){
+			$persona->email_trabajo = $contacto->email_trabajo;
+			$persona->email_personal = $contacto->email_personal;
+			$persona->telefono_casa = $contacto->telefono_casa;
+			$persona->oficina_extension = $contacto->oficina_extension;
+			//return theme('contactosVer',array('contacto' => $contacto));
+		}
+		return theme('contactosVer',array('contacto' => $persona));
 	}
 
 	/*
@@ -103,9 +178,32 @@
 	function directorio_theme(){
 		return  array(
 				'contactosVer' => array(
+						'variables'	=>	array("contacto" => NULL),
 						'template' => 'contacto-ver'
+					),
+				'directorio' => array(
+					'variables'	=> array('contactos' => NULL),
+					'template'	=> 'directorio'
 					)
 				);
+	}
+   /*
+   */
+   function template_preprocess_contactosVer(&$variables){
+   		dsm($variables);
+   		$variables['ultimaconsulta'] = format_date(time(),'short');
+   }
+
+	/*
+	* Implements Cargar contacto
+	*/
+
+	function contactoLoad($cid){
+		return db_select('contactos','c')
+			->fields('c')
+			->condition('c.cid',$cid)
+			->execute()
+			->fetchObject();
 	}
 
 	/*
@@ -258,8 +356,12 @@
 				'description'	=> t('agregar contactos')
 				),
 			'busqueda' => array(
-				'title ' => 'agregar contacto',
+				'title ' => 'Buscar',
 				'description'	=> t('agregar contactos')
+				),
+			'ver datos privados' => array(
+				'title' =>  'Datos privados',
+				'description' => t('ver datos privados')
 				)
 			);
 	}
